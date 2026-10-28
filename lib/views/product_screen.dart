@@ -1,3 +1,4 @@
+
 import 'package:e_commerce_mobile_app/providers/AuthProvider.dart';
 import 'package:e_commerce_mobile_app/providers/cart_provider.dart';
 import 'package:e_commerce_mobile_app/views/add_product_screen.dart';
@@ -14,7 +15,9 @@ class ProductScreen extends StatefulWidget {
 }
 
 class _ProductScreenState extends State<ProductScreen> {
-  
+  String _selectedCategory = 'الكل';
+  final List<String> _categories = ['الكل', 'إلكترونيات', 'أزياء', 'إكسسوارات'];
+
   final List<Product> _allDummyProducts = [
     Product(
       id: 1,
@@ -124,23 +127,73 @@ class _ProductScreenState extends State<ProductScreen> {
           'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500',
       category: 'إلكترونيات',
     ),
+    Product(
+      id: 13,
+      name: 'ساعة يد كلاسيكية',
+      description: 'ساعة جلدية فاخرة.',
+      price: 150.00,
+      imageUrl:
+          'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=500',
+      category: 'إكسسوارات',
+    ),
+    Product(
+      id: 14,
+      name: 'كاميرا احترافية',
+      description: 'كاميرا بدقة عالية لتصوير الفيديو.',
+      price: 850.00,
+      imageUrl:
+          'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500',
+      category: 'إلكترونيات',
+    ),
+    Product(
+      id: 15,
+      name: 'ساعة ذكية عصرية',
+      description: 'ساعة ذكية بشاشة أموليد.',
+      price: 99.99,
+      imageUrl:
+          'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
+      category: 'إلكترونيات',
+    ),
+    Product(
+      id: 16,
+      name: 'سماعات بلوتوث',
+      description: 'سماعات عازلة للضوضاء.',
+      price: 120.00,
+      imageUrl:
+          'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
+      category: 'إلكترونيات',
+    ),
   ];
 
-  int _currentPage = 0;
-  final int _pageSize = 6;
+  int _currentPage = 0; 
+  final int _pageSize =
+      6; 
 
   List<Product> _getCurrentPageProducts() {
+    final filtered = _selectedCategory == 'الكل'
+        ? _allDummyProducts
+        : _allDummyProducts
+              .where((p) => p.category == _selectedCategory)
+              .toList();
+
     int startIndex = _currentPage * _pageSize;
-    if (startIndex >= _allDummyProducts.length) return [];
+    if (startIndex >= filtered.length) return [];
 
     int endIndex = startIndex + _pageSize;
-    if (endIndex > _allDummyProducts.length) endIndex = _allDummyProducts.length;
+    if (endIndex > filtered.length) endIndex = filtered.length;
 
-    return _allDummyProducts.sublist(startIndex, endIndex);
+    return filtered.sublist(startIndex, endIndex);
   }
 
+  
   int _getTotalPages() {
-    return (_allDummyProducts.length / _pageSize).ceil();
+    final filtered = _selectedCategory == 'الكل'
+        ? _allDummyProducts
+        : _allDummyProducts
+              .where((p) => p.category == _selectedCategory)
+              .toList();
+
+    return (filtered.length / _pageSize).ceil();
   }
 
   @override
@@ -164,10 +217,12 @@ class _ProductScreenState extends State<ProductScreen> {
         elevation: 0,
         centerTitle: true,
         actions: [
+          
           IconButton(
             icon: const Icon(Icons.receipt_long_rounded, color: Colors.white),
             tooltip: 'الطلبات',
             onPressed: () {
+              
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const OrdersScreen()),
@@ -176,6 +231,7 @@ class _ProductScreenState extends State<ProductScreen> {
           ),
         ],
       ),
+
       floatingActionButton: authProvider.userRole == 'ADMIN'
           ? FloatingActionButton(
               backgroundColor: const Color(0xFF3F51B5),
@@ -190,6 +246,7 @@ class _ProductScreenState extends State<ProductScreen> {
               },
             )
           : null,
+
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -205,13 +262,56 @@ class _ProductScreenState extends State<ProductScreen> {
               textAlign: TextAlign.right,
             ),
           ),
+
+          SizedBox(
+            height: 50,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: _categories.length,
+              itemBuilder: (context, index) {
+                final category = _categories[index];
+                final isSelected = category == _selectedCategory;
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: ChoiceChip(
+                    label: Text(category),
+                    selected: isSelected,
+                    selectedColor: const Color(0xFF3F51B5),
+                    backgroundColor: Colors.white,
+                    labelStyle: TextStyle(
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF718096),
+                      fontWeight: FontWeight.bold,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(
+                        color: isSelected
+                            ? const Color(0xFF3F51B5)
+                            : const Color(0xFFE2E8F0),
+                      ),
+                    ),
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedCategory = category;
+                        _currentPage =
+                            0; 
+                      });
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
           const SizedBox(height: 10),
 
           Expanded(
             child: currentProducts.isEmpty
                 ? const Center(
                     child: Text(
-                      'لا توجد منتجات حالياً',
+                      'لا توجد منتجات في هذا التصنيف حالياً',
                       style: TextStyle(color: Color(0xFF718096), fontSize: 16),
                     ),
                   )
@@ -222,11 +322,11 @@ class _ProductScreenState extends State<ProductScreen> {
                     ),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.72,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.72,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
                     itemCount: currentProducts.length,
                     itemBuilder: (context, index) {
                       final product = currentProducts[index];
@@ -257,12 +357,12 @@ class _ProductScreenState extends State<ProductScreen> {
                                   width: double.infinity,
                                   errorBuilder: (context, error, stackTrace) =>
                                       Container(
-                                    color: Colors.grey[200],
-                                    child: const Icon(
-                                      Icons.image_not_supported,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
+                                        color: Colors.grey[200],
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
                                 ),
                               ),
                             ),
@@ -294,17 +394,20 @@ class _ProductScreenState extends State<ProductScreen> {
                                           fontSize: 14,
                                         ),
                                       ),
+                                      
                                       GestureDetector(
                                         onTap: () {
+                                          
                                           final cartProvider =
                                               Provider.of<CartProvider>(
-                                            context,
-                                            listen: false,
-                                          );
+                                                context,
+                                                listen: false,
+                                              );
                                           cartProvider.addProductToCart(
                                             product,
                                           );
 
+                                          
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
@@ -355,6 +458,7 @@ class _ProductScreenState extends State<ProductScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // زر السابقة
                   ElevatedButton.icon(
                     onPressed: _currentPage > 0
                         ? () {
@@ -371,6 +475,8 @@ class _ProductScreenState extends State<ProductScreen> {
                     icon: const Icon(Icons.arrow_back_ios, size: 14),
                     label: const Text('السابقة'),
                   ),
+
+                 
                   Text(
                     'الصفحة ${_currentPage + 1} من $totalPages',
                     style: const TextStyle(
@@ -378,6 +484,8 @@ class _ProductScreenState extends State<ProductScreen> {
                       color: Color(0xFF2D3748),
                     ),
                   ),
+
+                  
                   ElevatedButton.icon(
                     onPressed: _currentPage < totalPages - 1
                         ? () {
