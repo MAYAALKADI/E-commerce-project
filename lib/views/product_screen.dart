@@ -70,11 +70,84 @@ class _ProductScreenState extends State<ProductScreen> {
           'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500',
       category: 'إلكترونيات',
     ),
+    Product(
+      id: 7,
+      name: 'قميص قطني كاجوال',
+      description: 'قميص مريح للاستخدام اليومي.',
+      price: 25.00,
+      imageUrl:
+          'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500',
+      category: 'أزياء',
+    ),
+    Product(
+      id: 8,
+      name: 'محفظة جلدية',
+      description: 'محفظة جلد طبيعي فاخرة.',
+      price: 40.00,
+      imageUrl:
+          'https://images.unsplash.com/photo-1627123424574-724758594e93?w=500',
+      category: 'إكسسوارات',
+    ),
+    Product(
+      id: 9,
+      name: 'جهاز لابتوب برو',
+      description: 'لابتوب قوي للأعمال والبرمجة.',
+      price: 1100.00,
+      imageUrl:
+          'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500',
+      category: 'إلكترونيات',
+    ),
+    Product(
+      id: 10,
+      name: 'جاكيت شتوي',
+      description: 'جاكيت دافئ ومقاوم للبرد.',
+      price: 85.00,
+      imageUrl:
+          'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500',
+      category: 'أزياء',
+    ),
+    Product(
+      id: 11,
+      name: 'ساعة يد كلاسيكية',
+      description: 'ساعة جلدية فاخرة.',
+      price: 150.00,
+      imageUrl:
+          'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=500',
+      category: 'إكسسوارات',
+    ),
+    Product(
+      id: 12,
+      name: 'كاميرا احترافية',
+      description: 'كاميرا بدقة عالية لتصوير الفيديو.',
+      price: 850.00,
+      imageUrl:
+          'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500',
+      category: 'إلكترونيات',
+    ),
   ];
+
+  int _currentPage = 0;
+  final int _pageSize = 6;
+
+  List<Product> _getCurrentPageProducts() {
+    int startIndex = _currentPage * _pageSize;
+    if (startIndex >= _allDummyProducts.length) return [];
+
+    int endIndex = startIndex + _pageSize;
+    if (endIndex > _allDummyProducts.length) endIndex = _allDummyProducts.length;
+
+    return _allDummyProducts.sublist(startIndex, endIndex);
+  }
+
+  int _getTotalPages() {
+    return (_allDummyProducts.length / _pageSize).ceil();
+  }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final currentProducts = _getCurrentPageProducts();
+    final totalPages = _getTotalPages();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -135,7 +208,7 @@ class _ProductScreenState extends State<ProductScreen> {
           const SizedBox(height: 10),
 
           Expanded(
-            child: _allDummyProducts.isEmpty
+            child: currentProducts.isEmpty
                 ? const Center(
                     child: Text(
                       'لا توجد منتجات حالياً',
@@ -154,9 +227,9 @@ class _ProductScreenState extends State<ProductScreen> {
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
                     ),
-                    itemCount: _allDummyProducts.length,
+                    itemCount: currentProducts.length,
                     itemBuilder: (context, index) {
-                      final product = _allDummyProducts[index];
+                      final product = currentProducts[index];
                       return Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -274,6 +347,56 @@ class _ProductScreenState extends State<ProductScreen> {
                     },
                   ),
           ),
+
+          if (totalPages > 1)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              color: Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _currentPage > 0
+                        ? () {
+                            setState(() {
+                              _currentPage--;
+                            });
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF3F51B5),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey[300],
+                    ),
+                    icon: const Icon(Icons.arrow_back_ios, size: 14),
+                    label: const Text('السابقة'),
+                  ),
+                  Text(
+                    'الصفحة ${_currentPage + 1} من $totalPages',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2D3748),
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: _currentPage < totalPages - 1
+                        ? () {
+                            setState(() {
+                              _currentPage++;
+                            });
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF3F51B5),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey[300],
+                    ),
+                    label: const Text('التالية'),
+                    icon: const Icon(Icons.arrow_forward_ios, size: 14),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
