@@ -1,0 +1,23 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "com.example.inventory.grpc";
+
+service InventoryService {
+  rpc RegisterProduct (RegisterProductRequest) returns (RegisterProductResponse);
+  rpc CheckStock (StockRequest) returns (StockResponse);
+  rpc ReserveStock (ReserveRequest) returns (ReserveResponse);
+  rpc ReleaseStock (ReleaseRequest) returns (ReleaseResponse);
+}
+
+message RegisterProductRequest { int64 product_id = 1; int32 quantity = 2; }
+message RegisterProductResponse { bool success = 1; }
+
+message StockRequest { int64 product_id = 1; }
+message StockResponse { int64 product_id = 1; int32 available = 2; bool exists = 3; }
+
+message Item { int64 product_id = 1; int32 quantity = 2; }
+message ReserveRequest { string order_id = 1; repeated Item items = 2; }
+message ReserveResponse { bool success = 1; string message = 2; }
+
+message ReleaseRequest { string order_id = 1; }
+message ReleaseResponse { bool success = 1; }

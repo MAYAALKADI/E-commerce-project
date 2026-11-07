@@ -1,11 +1,22 @@
-version: '3.8'
-
 services:
-  app:
+  inventory-service:
+    build: ./inventory-service
+    ports:
+      - "9090:9090"
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:h2:file:/data/inventory-db
+    volumes:
+      - inventory-data:/data
+
+  store:
     build: .
-    container_name: store_backend_app
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-    restart: always
+      INVENTORY_GRPC_HOST: inventory-service
+    depends_on:
+      - inventory-service
+
+volumes:
+  inventory-data:
