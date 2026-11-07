@@ -22,4 +22,9 @@ public class Product {
     
     private String category; 
     private String imageUrl; 
+
+      // مش مخزّنة بقاعدة المتجر. الكمية مكانها المستودع.
+    // بتنقبل عند إضافة المنتج، وبتنعبّى عند عرض التفاصيل.
+    @Transient
+    private Integer quantity;
 }

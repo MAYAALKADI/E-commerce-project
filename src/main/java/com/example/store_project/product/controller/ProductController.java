@@ -39,4 +39,11 @@ public class ProductController {
         Product savedProduct = productService.addProduct(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
+
+    @GetMapping("/{id}")
+public ResponseEntity<Product> getProduct(@PathVariable Long id) {
+    return productService.getProductById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+}
 }
