@@ -1,4 +1,21 @@
 services:
+  mysql-primary:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpass
+      MARIADB_DATABASE: storedb
+      MARIADB_USER: store
+      MARIADB_PASSWORD: storepass
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-primary-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
   inventory-service:
     build: ./inventory-service
     ports:
@@ -15,8 +32,18 @@ services:
       - "8080:8080"
     environment:
       INVENTORY_GRPC_HOST: inventory-service
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mysql-primary:3306/storedb
+      SPRING_DATASOURCE_USERNAME: store
+      SPRING_DATASOURCE_PASSWORD: storepass
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MariaDBDialect
+      SEED_ENABLED: "false"
     depends_on:
-      - inventory-service
+      mysql-primary:
+        condition: service_healthy
+      inventory-service:
+        condition: service_started
 
 volumes:
   inventory-data:
+  mysql-primary-data:

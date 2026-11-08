@@ -19,7 +19,12 @@
         <java.version>21</java.version>
     </properties>
     <dependencies>
-    
+<dependency>
+    <groupId>org.mariadb.jdbc</groupId>
+    <artifactId>mariadb-java-client</artifactId>
+    <scope>runtime</scope>
+</dependency>
+
     <!-- JWT -->
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
