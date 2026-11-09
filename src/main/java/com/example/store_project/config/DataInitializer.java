@@ -7,13 +7,19 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+
+
 @Configuration
 public class DataInitializer {
 
+    
     @Bean
     CommandLineRunner initDatabase(ProductRepository productRepository,
                                    InventoryClient inventoryClient) {
         return args -> {
+            if (productRepository.count() > 0) {
+            return;
+                                               }
             Product p1 = new Product();
             p1.setName("آيفون 15");
             p1.setPrice(999.0);

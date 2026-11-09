@@ -1,6 +1,10 @@
 services:
   mysql-primary:
     image: mariadb:10.11
+    command:
+      - --server-id=1
+      - --log-bin=mysql-bin
+      - --binlog-format=ROW
     environment:
       MARIADB_ROOT_PASSWORD: rootpass
       MARIADB_DATABASE: storedb
@@ -15,6 +19,30 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
+
+  mysql-replica:
+    image: mariadb:10.11
+    command:
+      - --server-id=2
+      - --relay-log=relay-bin
+      - --read-only=1
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpass
+      MARIADB_DATABASE: storedb
+      MARIADB_USER: store
+      MARIADB_PASSWORD: storepass
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-replica-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      mysql-primary:
+        condition: service_healthy
 
   inventory-service:
     build: ./inventory-service
@@ -38,6 +66,9 @@ services:
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MariaDBDialect
       SEED_ENABLED: "false"
+      REPLICA_DATASOURCE_URL: jdbc:mariadb://mysql-replica:3306/storedb
+      REPLICA_DATASOURCE_USERNAME: store
+      REPLICA_DATASOURCE_PASSWORD: storepass
     depends_on:
       mysql-primary:
         condition: service_healthy
@@ -47,3 +78,4 @@ services:
 volumes:
   inventory-data:
   mysql-primary-data:
+  mysql-replica-data:

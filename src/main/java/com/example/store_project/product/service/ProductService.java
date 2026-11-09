@@ -6,6 +6,7 @@ import com.example.store_project.product.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -19,7 +20,7 @@ public class ProductService {
         this.productRepository = productRepository;
         this.inventoryClient = inventoryClient;
     }
-
+@Transactional(readOnly = true)
     public Page<Product> getAllProducts(String category, Pageable pageable) {
         if (category != null && !category.trim().isEmpty()) {
             return productRepository.findByCategory(category, pageable);
@@ -43,8 +44,7 @@ public class ProductService {
         return saved;
     }
 
-    // تفاصيل منتج مع الكمية من المستودع
-    public Optional<Product> getProductById(Long id) {
+@Transactional(readOnly = true)    public Optional<Product> getProductById(Long id) {
         Optional<Product> product = productRepository.findById(id);
         product.ifPresent(p -> p.setQuantity(inventoryClient.getAvailable(p.getId())));
         return product;
