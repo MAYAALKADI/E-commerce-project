@@ -1,0 +1,10 @@
+BASELINE (BEFORE optimization)
+Dataset: 100,000 orders, 2,000 products, 1,000 users (MariaDB)
+Load: 20 VUs per endpoint, 30s each
+
+Endpoint          avg       p50(med)   p90       p95       p99       max
+products_list     27.06ms   10.57ms    65.45ms   103.17ms  247.59ms  609.68ms
+product_detail    23.32ms   10.27ms    51.59ms   80.95ms   216.93ms  504.51ms
+my_orders         1.19s     1.10s      1.76s     2.00s     3.22s     3.69s
+
+Total requests: 9688 | Failed: 0.00% | Checks: 100% (9668/9668)

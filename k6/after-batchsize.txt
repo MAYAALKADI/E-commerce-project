@@ -1,0 +1,8 @@
+AFTER INDEX + BATCHSIZE (N+1 fixed)
+
+Endpoint          avg       p50(med)   p90       p95       p99       max
+products_list     30.01ms   17.04ms    73.26ms   100.37ms  170.95ms  310.94ms
+product_detail    55.85ms   31.25ms    131.67ms  190.33ms  410.13ms  540.28ms
+my_orders         67.61ms   45.64ms    154.46ms  203.85ms  308.54ms  482.66ms
+
+Total requests: 11660 | Failed: 0.00% | Checks: 100% (11640/11640)
