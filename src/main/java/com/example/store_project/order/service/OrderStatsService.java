@@ -4,6 +4,7 @@ import com.example.store_project.order.model.AdminStats;
 import com.example.store_project.order.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.time.Instant;
 import java.util.List;
@@ -18,6 +19,7 @@ public class OrderStatsService {
     }
 
     // readOnly = true  ==> بيروح للـ Replica (الـ Routing)
+    @Cacheable(cacheNames = "adminStats", key = "'stats'")
     @Transactional(readOnly = true)
     public AdminStats getStats() {
         long start = System.currentTimeMillis();
@@ -37,6 +39,6 @@ public class OrderStatsService {
                         r.getTimesOrdered().longValue()))
                 .toList();
 
-        return new AdminStats(Instant.now(), System.currentTimeMillis() - start, byStatus, top);
-    }
+                return new AdminStats(java.time.Instant.now().toString(), System.currentTimeMillis() - start, byStatus, top);
+        }
 }

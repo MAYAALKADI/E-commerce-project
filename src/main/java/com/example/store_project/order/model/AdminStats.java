@@ -1,10 +1,9 @@
 package com.example.store_project.order.model;
 
-import java.time.Instant;
 import java.util.List;
 
 public record AdminStats(
-        Instant generatedAt,
+        String generatedAt,
         long queryTimeMs,
         List<StatusStat> byStatus,
         List<TopProduct> topProducts) {

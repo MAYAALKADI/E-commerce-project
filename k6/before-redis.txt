@@ -1,0 +1,37 @@
+BEFORE REDIS (no cache)
+
+Endpoint: GET /api/v1/orders/admin/stats (admin, reads from Replica)
+Dataset: 100,000 orders, 2,000 products
+
+queryTimeMs (3 runs, second measurement round):
+  run 1: 2062 ms
+  run 2: 2389 ms
+  run 3: 3323 ms
+
+queryTimeMs (first measurement round):
+  run 1: 1269 ms
+  run 2: 2280 ms
+  run 3: 3112 ms
+
+Note: times vary on a single dev machine (Docker + k6 + DB on the same host).
+Every request re-runs the heavy GROUP BY / JOIN queries.
+
+k6 baseline.js results:
+
+  █ THRESHOLDS
+
+    http_req_duration{endpoint:my_orders}
+    ✓ 'max>=0' max=460.09ms
+
+    http_req_duration{endpoint:product_detail}
+    ✓ 'max>=0' max=773.86ms
+
+    http_req_duration{endpoint:products_list}
+    ✓ 'max>=0' max=785.52ms
+
+
+  █ TOTAL RESULTS
+
+    checks_total.......: 10842   102.690356/s
+    checks_succeeded...: 100.00% 10842 out of 10842
+    checks_failed......: 0.00%   0 out of 10842

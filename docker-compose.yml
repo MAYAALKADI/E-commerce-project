@@ -44,6 +44,16 @@ services:
       mysql-primary:
         condition: service_healthy
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
   inventory-service:
     build: ./inventory-service
     ports:
@@ -69,11 +79,15 @@ services:
       REPLICA_DATASOURCE_URL: jdbc:mariadb://mysql-replica:3306/storedb
       REPLICA_DATASOURCE_USERNAME: store
       REPLICA_DATASOURCE_PASSWORD: storepass
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
     depends_on:
       mysql-primary:
         condition: service_healthy
       inventory-service:
         condition: service_started
+      redis:
+        condition: service_healthy
 
 volumes:
   inventory-data:
