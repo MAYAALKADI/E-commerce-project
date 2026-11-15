@@ -12,6 +12,7 @@ public class ReadWriteRoutingDataSource extends AbstractRoutingDataSource {
         if (RoutingContext.isForcePrimary()) {
             return Route.PRIMARY;
         }
+        //معلّمة readOnly = true ← Replica، غير هيك ← Primary
         return TransactionSynchronizationManager.isCurrentTransactionReadOnly()
                 ? Route.REPLICA
                 : Route.PRIMARY;

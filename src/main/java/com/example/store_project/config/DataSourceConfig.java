@@ -40,7 +40,6 @@ public class DataSourceConfig {
         routing.setTargetDataSources(targets);
         routing.setDefaultTargetDataSource(primaryDataSource);
         routing.afterPropertiesSet();
-        // Lazy: ما يفتح اتصال إلا لما فعلاً يحتاجه، بعد ما تتحدد الـ readOnly
         return new LazyConnectionDataSourceProxy(routing);
     }
 

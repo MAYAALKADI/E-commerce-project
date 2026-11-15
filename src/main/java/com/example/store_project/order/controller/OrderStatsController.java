@@ -1,6 +1,5 @@
 package com.example.store_project.order.controller;
 
-import com.example.store_project.order.model.AdminStats;
 import com.example.store_project.order.service.OrderStatsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,8 +16,8 @@ public class OrderStatsController {
         this.statsService = statsService;
     }
 
-    @GetMapping
-    public ResponseEntity<AdminStats> getStats() {
-        return ResponseEntity.ok(statsService.getStats());
+    @GetMapping(produces = "application/json")
+    public ResponseEntity<String> getStats() {
+        return ResponseEntity.ok(statsService.getStatsJson());
     }
 }

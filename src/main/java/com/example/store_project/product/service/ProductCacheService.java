@@ -14,8 +14,6 @@ public class ProductCacheService {
         this.productRepository = productRepository;
     }
 
-    // بدون readOnly عن قصد: القراءة هون من الـ Primary، عشان ما نعبّي الكاش بنسخة قديمة من الـ Replica
-    // (null ما بينخزّن لأنو CacheConfig فيه disableCachingNullValues)
     @Cacheable(cacheNames = "productDetail", key = "#id")
     public Product findById(Long id) {
         return productRepository.findById(id).orElse(null);
