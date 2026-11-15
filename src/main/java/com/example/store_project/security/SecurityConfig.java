@@ -40,10 +40,11 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
 
-                // التعديل هنا: المسار أصبح يقبل عرض المنتجات مع أو بدون فلاتر للجميع
+                // WebSocket handshake: مفتوح هون، والتحقق من JWT بيصير داخل STOMP (WebSocketAuthInterceptor)
+                .requestMatchers("/ws/**").permitAll()
+
                 .requestMatchers(HttpMethod.GET, "/api/v1/products", "/api/v1/products/**").permitAll()
 
-                // باقي الصلاحيات الخاصة بالأدمن (تم تنظيف الروابط)
                 .requestMatchers(HttpMethod.POST, "/api/v1/products", "/api/v1/products/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/products", "/api/v1/products/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/products", "/api/v1/products/**").hasRole("ADMIN")
@@ -51,7 +52,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/*/status").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
 
-                // أي مسار يخص الطلبات يحتاج تسجيل دخول
                 .requestMatchers("/api/v1/orders/**").authenticated()
 
                 .anyRequest().authenticated()
