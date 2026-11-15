@@ -4,6 +4,8 @@ import com.example.store_project.config.RecentWriteTracker;
 import com.example.store_project.config.RoutingContext;
 import com.example.store_project.inventory.client.InventoryClient;
 import com.example.store_project.notification.service.NotificationService;
+import com.example.store_project.order.event.OrderCreatedEvent;
+import com.example.store_project.order.event.OrderEventPublisher;
 import com.example.store_project.order.model.Order;
 import com.example.store_project.order.repository.OrderRepository;
 import org.hibernate.Hibernate;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,15 +32,18 @@ public class OrderService {
     private final NotificationService notificationService;
     private final InventoryClient inventoryClient;
     private final RecentWriteTracker recentWrites;
+    private final OrderEventPublisher eventPublisher;
 
     public OrderService(OrderRepository orderRepository,
                         NotificationService notificationService,
                         InventoryClient inventoryClient,
-                        RecentWriteTracker recentWrites) {
+                        RecentWriteTracker recentWrites,
+                        OrderEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
         this.notificationService = notificationService;
         this.inventoryClient = inventoryClient;
         this.recentWrites = recentWrites;
+        this.eventPublisher = eventPublisher;
     }
 
     public Order createOrder(Order order) {
@@ -70,8 +76,13 @@ public class OrderService {
         // Read-Your-Writes: خلّي قراءات هالمستخدم تروح للـ Primary لفترة قصيرة
         recentWrites.markWritten(savedOrder.getUsername());
 
+        // إشعار داخل التطبيق (صفحة الزبون)
         notificationService.sendNotification(savedOrder.getUsername(),
                 "تم إنشاء طلبك بنجاح برقم: " + savedOrder.getId());
+
+        // نشر الحدث: الإيميل بيتعالج بالخلفية (Worker) والزبون بياخد الرد فوراً
+        eventPublisher.publishOrderCreated(new OrderCreatedEvent(
+                savedOrder.getId(), savedOrder.getUsername(), Instant.now()));
 
         return savedOrder;
     }
