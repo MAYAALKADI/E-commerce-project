@@ -81,7 +81,17 @@ services:
       REPLICA_DATASOURCE_PASSWORD: storepass
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: "6379"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: adminpass
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: "1025"
     depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
       mysql-primary:
         condition: service_healthy
       inventory-service:
@@ -89,7 +99,30 @@ services:
       redis:
         condition: service_healthy
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"    # بورت التطبيق (AMQP)
+      - "15672:15672"   # واجهة الإدارة
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: adminpass
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"    # SMTP وهمي
+      - "8025:8025"    # صفحة ويب لرؤية الإيميلات
+
 volumes:
   inventory-data:
   mysql-primary-data:
   mysql-replica-data:
+  rabbitmq-data:
