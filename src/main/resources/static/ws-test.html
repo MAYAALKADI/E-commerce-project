@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>WebSocket Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+  <style>
+    body { font-family: Arial; max-width: 700px; margin: 20px auto; }
+    input { width: 100%; margin: 4px 0; padding: 6px; }
+    button { margin: 4px 4px 4px 0; padding: 6px 12px; }
+    #log { background: #111; color: #0f0; padding: 10px; height: 280px; overflow: auto; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h3>STOMP Test Client</h3>
+  <input id="token" placeholder="JWT token (without Bearer)">
+  <input id="channel" placeholder="/topic/admin/orders  or  /topic/orders/username">
+  <button onclick="connectAndSubscribe()">Connect + Subscribe</button>
+  <button onclick="disconnectWs()">Disconnect</button>
+  <div id="log"></div>
+
+  <script>
+    let client = null;
+    const logBox = document.getElementById('log');
+    function log(msg) {
+      logBox.innerHTML += new Date().toLocaleTimeString() + '  ' + msg + '<br>';
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+    function connectAndSubscribe() {
+      const token = document.getElementById('token').value.trim();
+      const channel = document.getElementById('channel').value.trim();
+      client = new StompJs.Client({
+        brokerURL: 'ws://' + location.host + '/ws',
+        connectHeaders: { Authorization: 'Bearer ' + token },
+        reconnectDelay: 0,
+        onConnect: () => {
+          log('CONNECTED');
+          client.subscribe(channel, m => log('PUSH on ' + channel + ' : ' + m.body));
+          log('SUBSCRIBE sent: ' + channel);
+        },
+        onStompError: f => log('STOMP ERROR: ' + (f.headers['message'] || f.body)),
+        onWebSocketClose: () => log('CLOSED')
+      });
+      client.activate();
+    }
+    function disconnectWs() { if (client) client.deactivate(); }
+  </script>
+</body>
+</html>

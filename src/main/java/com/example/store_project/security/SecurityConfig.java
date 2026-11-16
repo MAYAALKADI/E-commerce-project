@@ -42,6 +42,7 @@ public class SecurityConfig {
 
                 // WebSocket handshake: مفتوح هون، والتحقق من JWT بيصير داخل STOMP (WebSocketAuthInterceptor)
                 .requestMatchers("/ws/**").permitAll()
+                .requestMatchers("/ws-test.html").permitAll()
 
                 .requestMatchers(HttpMethod.GET, "/api/v1/products", "/api/v1/products/**").permitAll()
 

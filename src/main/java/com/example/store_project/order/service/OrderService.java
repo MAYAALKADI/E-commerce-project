@@ -73,14 +73,16 @@ public class OrderService {
             throw e;
         }
 
-        // Read-Your-Writes: خلّي قراءات هالمستخدم تروح للـ Primary لفترة قصيرة
         recentWrites.markWritten(savedOrder.getUsername());
 
-        // إشعار داخل التطبيق (صفحة الزبون)
+        // إشعار الزبون (محفوظ + لحظي)
         notificationService.sendNotification(savedOrder.getUsername(),
                 "تم إنشاء طلبك بنجاح برقم: " + savedOrder.getId());
 
-        // نشر الحدث: الإيميل بيتعالج بالخلفية (Worker) والزبون بياخد الرد فوراً
+        // لوحة المسؤول: يظهر الطلب فوراً بدون refresh
+        notificationService.notifyAdminNewOrder(savedOrder.getId(), savedOrder.getUsername());
+
+        // الإيميل: حدث للـ Worker، والزبون بياخد الرد فوراً
         eventPublisher.publishOrderCreated(new OrderCreatedEvent(
                 savedOrder.getId(), savedOrder.getUsername(), Instant.now()));
 
@@ -95,7 +97,6 @@ public class OrderService {
         }
         try {
             List<Order> orders = orderRepository.findByUsername(username);
-            // نحمّل productIds جوّا الـ transaction (استعلام Batch واحد)
             orders.forEach(o -> Hibernate.initialize(o.getProductIds()));
             return orders;
         } finally {
@@ -121,6 +122,7 @@ public class OrderService {
 
         recentWrites.markWritten(updatedOrder.getUsername());
 
+        // صفحة الزبون: تتغيّر الحالة لحظياً (sendNotification بيدفعها للقناة)
         notificationService.sendNotification(updatedOrder.getUsername(),
                 "تم تغيير حالة طلبك رقم " + updatedOrder.getId() + " إلى: " + newStatus);
 
