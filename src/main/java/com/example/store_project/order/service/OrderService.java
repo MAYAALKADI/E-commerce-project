@@ -75,14 +75,11 @@ public class OrderService {
 
         recentWrites.markWritten(savedOrder.getUsername());
 
-        // إشعار الزبون (محفوظ + لحظي)
         notificationService.sendNotification(savedOrder.getUsername(),
                 "تم إنشاء طلبك بنجاح برقم: " + savedOrder.getId());
 
-        // لوحة المسؤول: يظهر الطلب فوراً بدون refresh
         notificationService.notifyAdminNewOrder(savedOrder.getId(), savedOrder.getUsername());
 
-        // الإيميل: حدث للـ Worker، والزبون بياخد الرد فوراً
         eventPublisher.publishOrderCreated(new OrderCreatedEvent(
                 savedOrder.getId(), savedOrder.getUsername(), Instant.now()));
 
@@ -111,18 +108,19 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    // بدون readOnly عن قصد: القراءة هون مقدّمة لتعديل، فلازم من الـ Primary
+    // @Transactional بدون readOnly: القراءة مقدّمة لتعديل، فلازم تروح للـ Primary
+    @Transactional
     public Optional<Order> getOrderById(Long id) {
         return orderRepository.findById(id);
     }
 
+    @Transactional
     public Order updateStatus(Order order, String newStatus) {
         order.setStatus(newStatus);
         Order updatedOrder = orderRepository.save(order);
 
         recentWrites.markWritten(updatedOrder.getUsername());
 
-        // صفحة الزبون: تتغيّر الحالة لحظياً (sendNotification بيدفعها للقناة)
         notificationService.sendNotification(updatedOrder.getUsername(),
                 "تم تغيير حالة طلبك رقم " + updatedOrder.getId() + " إلى: " + newStatus);
 
